@@ -1,0 +1,28 @@
+[project]
+name = "VideoApi"
+version = "0.1.0"
+description = "A Video streaming API"
+authors = [
+    {name = "Thomas Sørensen", email= "thom199b@gmail.com"}
+]
+
+dependencies = [
+    "fastapi==0.95.1",
+    "azure-functions==1.14.0",
+    "httpx==0.24.0",
+    "azure-storage-blob==12.16.0",
+    "uvicorn==0.22.0",
+    "asyncio==3.4.3",
+    "python-multipart==0.0.6",
+    "aiohttp==3.8.4"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pylint"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
