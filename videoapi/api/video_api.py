@@ -46,11 +46,11 @@ async def list_videos(request: fastapi.Request,folder_name: str):
 
 @router.get('/folder/list/')
 # @auth.requires_auth
-async def list_folders(request: fastapi.Request):
+async def list_folders(request: fastapi.Request, folder_name: str = None ):
     '''List all folders'''
     # try:
         # auth.validate_scope(required_scope=expected_scope,request=request)
-    folders = await service.list_folders()
+    folders = await service.list_folders(folder_name)
     return {'folders':folders}
     # except auth.AuthError as ae:
         #return fastapi.Response(content=ae.error_msg, status_code=ae.status_code)

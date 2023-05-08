@@ -46,7 +46,7 @@ class BlobStorage:
                 blobs += [files.file(name=blob.name,url='',size=blob.size)]
         return  blobs
     
-    async def list_folders(self) -> list[str]:
+    async def list_folders(self, folder_name: str = None) -> list[str]:
         blob_service_client = blobstorage.BlobServiceClient.from_connection_string(self.connection_string)
         print('IN Function!')
         async with blob_service_client:
