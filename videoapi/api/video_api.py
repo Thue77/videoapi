@@ -2,6 +2,7 @@ import fastapi
 from urllib.parse import unquote
 from typing import Optional
 from pathlib import Path
+import logging
 import sys
 
 src = Path(__file__).parent.parent
@@ -31,16 +32,17 @@ def get_video_url(video_name: str, folder_name: str, request: fastapi.Request):
     # try:
 
         # auth.validate_scope(required_scope=expected_scope,request=request)
+    logging.info(f"Getting sas url for item {video_name} in folder {folder_name}")
     return {'url': service.get_url(filename=video_name,foldername=folder_name)}
     # except auth.AuthError as ae:
         # return fastapi.Response(content=ae.error_msg, status_code=ae.status_code)
 
-@router.get('/item/{folder_name}/')
-async def list_videos(request: fastapi.Request,folder_name: str):
+@router.get('/item/{container_name}/')
+async def list_videos(request: fastapi.Request,container_name: str, folder_path: str = ""):
     '''List folder content'''
     service = source_factory.source_factory()
-    file_list = await service.list_folder_content(folder = folder_name)
-    return {'videos': [{key:value for key,value in file.dict().items()} for file in file_list]}
+    file_list = await service.list_folder_content(container = container_name, folder_path = folder_path)
+    return file_list
 
 
 

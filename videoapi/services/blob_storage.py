@@ -4,6 +4,7 @@ import azure.storage.blob.aio as blobstorage
 import azure.storage.blob as blobstorage_sync
 import azure.core.exceptions as blobstorage_exception
 import fastapi
+import logging
 from urllib.parse import unquote
 from  typing import Callable, Optional
 from datetime import datetime, timedelta
@@ -34,17 +35,30 @@ class BlobStorage:
         return sas_token#self.url + '?' + sas_token
     
     def get_url(self, filename: str, foldername: Optional[str]) -> str:
+        logging.info(f"Getting SAS url for item {filename} in folder {foldername}")
         sas_token = self.generate_sas_token(foldername=foldername,filename=filename)
         return self.blob_service_client.url + foldername + '/' + filename + '?' + sas_token
 
-    async def list_folder_content(self,folder="video") -> list[files.file]:
+    async def list_folder_content(self,container: str ="video", folder_path: str = "") -> list[files.file]:
         blob_service_client = blobstorage.BlobServiceClient.from_connection_string(self.connection_string)
+        logging.info(f"LIST folder content called with:\n container={container}, folder={folder_path}")
         async with blob_service_client:
-            container = blob_service_client.get_container_client(folder)
-            blobs = []
-            async for blob in container.list_blobs():
-                blobs += [files.file(name=blob.name,url='',size=blob.size)]
-        return  blobs
+            container = blob_service_client.get_container_client(container)
+            blobs = {"videos": [], "images": [], "folders": []}
+            
+            async for blob in container.walk_blobs(name_starts_with=folder_path, delimiter = '/'):#container.list_blobs():
+                # logging.info(f"-------*****TYPE:{type(blob)}")
+                # logging.info(f"This is the BlobProperty: {blob}")
+                # logging.info(f"-------*****TYPE:{isinstance(blob,blobstorage.BlobPrefix)}")
+                if isinstance(blob,blobstorage.BlobPrefix):
+                    blobs['folders'] += [blob]
+                else:
+                    logging.info(f"Blob called: {blob.name}")
+                    if blob.content_settings.content_type.split('/')[0] == 'video':
+                        blobs['videos'] += [{'name': blob.name, 'container': blob.container}]#[{key:value for key,value in attribute.dict().items()} for attribute in blob]# if "/" not in file.dict()["name"]],
+                    elif blob.content_settings.content_type.split('/')[0] == 'image':
+                        blobs['images'] += [{'name': blob.name, 'container': blob.container}]
+        return blobs
     
     async def list_folders(self, folder_name: str = None) -> list[str]:
         blob_service_client = blobstorage.BlobServiceClient.from_connection_string(self.connection_string)

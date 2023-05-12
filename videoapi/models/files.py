@@ -4,7 +4,9 @@ from typing import Optional
 class file(pydantic.BaseModel):
     name:   str
     url:    str
-    size:   float
+    size:   Optional[float]
     length: Optional[float]
+
+    # def is_folder
 
 # file().dict
